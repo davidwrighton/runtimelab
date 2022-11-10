@@ -1641,7 +1641,7 @@ void emitter::emitCheckIGoffsets()
 
 #endif // DEBUG
 
-#if defined(TARGET_AMD64)
+#if defined(WINDOWS_AMD64_ABI)
 
 void emitter::emitBegPreProlog()
 {
@@ -1710,7 +1710,7 @@ void emitter::emitEndPreProlog()
     }
 }
 
-#endif // defined(TARGET_AMD64)
+#endif // defined(WINDOWS_AMD64_ABI)
 
 
 /*****************************************************************************

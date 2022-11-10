@@ -5483,11 +5483,11 @@ void CodeGen::genFinalizeFrame()
  *  genFnPreProlog is optional (currently only on for x64 but eventually
  *  some frames will likely skip it).
  *
- *  Although currently only being used for TARGET_AMD64, this is eventually
+ *  Although currently only being used for WINDOWS_AMD64_ABI, this is eventually
  *  intended for all architectures, so it is not in codegenxarch.cpp.
  */
 
-#if defined(TARGET_AMD64)
+#if defined(WINDOWS_AMD64_ABI)
 void CodeGen::genFnPreProlog()
 {
     ScopedSetVariable<bool> _setGeneratingPreProlog(&compiler->compGeneratingPreProlog, true);
@@ -5545,7 +5545,7 @@ void CodeGen::genFnPreProlog()
 
     emit->emitEndPreProlog();
 }
-#endif // defined(TARGET_AMD64)
+#endif // defined(WINDOWS_AMD64_ABI)
 
 /*****************************************************************************
  *
