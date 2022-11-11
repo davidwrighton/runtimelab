@@ -1700,7 +1700,6 @@ void emitter::emitEndPreProlog()
     auto unwindCodeStart = (UNWIND_CODE*)&func->unwindCodes[func->unwindCodeSlot];
     auto unwindCodeEnd = (UNWIND_CODE*)&func->unwindCodes[sizeof(func->unwindCodes)];
 
-    int unwindCodeNodeSize = 1;
     for (auto unwindCodeCurrent = unwindCodeStart; unwindCodeCurrent != unwindCodeEnd; unwindCodeCurrent += UnwindCodeNodeSize(*unwindCodeCurrent))
     {
         uint8_t oldCodeOffset = unwindCodeCurrent->CodeOffset;
