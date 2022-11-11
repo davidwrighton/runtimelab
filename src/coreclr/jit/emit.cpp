@@ -1666,27 +1666,13 @@ void emitter::emitBegPreProlog()
 
 int UnwindCodeNodeSize(UNWIND_CODE code)
 {
-    int unwindCodeNodeSize = 1;
-    switch (code.UnwindOp)
+    if (code.UnwindOp == UWOP_ALLOC_LARGE)
     {
-        case UWOP_ALLOC_LARGE:
-            if (code.OpInfo == 0)
-                unwindCodeNodeSize = 2;
-            else
-                unwindCodeNodeSize = 3;
-            break;
-
-        case UWOP_SAVE_XMM128:
-        case UWOP_SAVE_NONVOL:
-            unwindCodeNodeSize = 2;
-            break;
-
-        case UWOP_SAVE_NONVOL_FAR:
-        case UWOP_SAVE_XMM128_FAR:
-            unwindCodeNodeSize = 3;
-            break;
+        return (code.OpInfo == 0) ? 2 : 3;
     }
-    return unwindCodeNodeSize;
+
+    // Since table gives -extra- slots, we add one for the actual size
+    return UnwindOpExtraSlotTable[code.UnwindOp] + 1;
 }
 
 void emitter::emitEndPreProlog()
@@ -1697,11 +1683,12 @@ void emitter::emitEndPreProlog()
     FuncInfoDsc* func = emitComp->funCurrentFunc();
     assert(func->unwindHeader.CountOfUnwindCodes == 0); // Can't call this after unwindReserve
 
-    auto unwindCodeStart = (UNWIND_CODE*)&func->unwindCodes[func->unwindCodeSlot];
-    auto unwindCodeEnd = (UNWIND_CODE*)&func->unwindCodes[sizeof(func->unwindCodes)];
+    auto unwindCodeStart = reinterpret_cast<UNWIND_CODE*>(&func->unwindCodes[func->unwindCodeSlot]);
+    auto unwindCodeEnd = reinterpret_cast<UNWIND_CODE*>(&func->unwindCodes[sizeof(func->unwindCodes)]);
 
     for (auto unwindCodeCurrent = unwindCodeStart; unwindCodeCurrent != unwindCodeEnd; unwindCodeCurrent += UnwindCodeNodeSize(*unwindCodeCurrent))
     {
+        assert(unwindCodeCurrent < unwindCodeEnd); // Avoid a corrupted size leading to overrun by skipping the end
         uint8_t oldCodeOffset = unwindCodeCurrent->CodeOffset;
         uint8_t newCodeOffset = (uint8_t)(oldCodeOffset + prePrologSize);
         assert(newCodeOffset > oldCodeOffset); // I'm not sure if we can overflow here, but an assert should help
